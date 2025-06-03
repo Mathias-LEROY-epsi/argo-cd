@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
         - name: luanti
-          image: lscr.io/linuxserver/minetest:latest
+          image: lscr.io/linuxserver/luanti:latest
           env:
             - name: TZ
               value: "Europe/Paris"
