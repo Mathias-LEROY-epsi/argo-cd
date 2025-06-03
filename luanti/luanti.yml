@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: games
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minetest-data-pvc
+  namespace: games
+spec:
+  storageClassName: "local-path"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: luanti
+  namespace: games
+  labels:
+    app: luanti
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: luanti
+  template:
+    metadata:
+      labels:
+        app: luanti
+    spec:
+      containers:
+        - name: luanti
+          image: lscr.io/linuxserver/minetest:latest
+          env:
+            - name: TZ
+              value: "Europe/Paris"
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+          ports:
+            - containerPort: 30000
+              protocol: UDP
+          volumeMounts:
+            - name: luanti-data
+              mountPath: /config/.minetest
+      volumes:
+        - name: luanti-data
+          persistentVolumeClaim:
+            claimName: minetest-data-pvc
+      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: luanti-svc
+  namespace: games
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 30000
+      targetPort: 30000
+      protocol: UDP
+  selector:
+    app: luanti
