@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ginginx
+  namespace: web
+  labels:
+    app: ginginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ginginx
+  template:
+    metadata:
+      labels:
+        app: ginginx
+    spec:
+      containers:
+        - name: ginginx
+          image: nginx:1.27
+          resources:
+            requests:
+              memory: "16Mi"
+              cpu: "5m"
+          ports:
+            - containerPort: 80
+              protocol: TCP
